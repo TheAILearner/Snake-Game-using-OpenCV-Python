@@ -1,0 +1,151 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Snake Game using Opencv-Python"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import cv2\n",
+    "import random\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def collision_with_apple(apple_position, score):\n",
+    "    apple_position = [random.randrange(1,50)*10,random.randrange(1,50)*10]\n",
+    "    score += 1\n",
+    "    return apple_position, score\n",
+    "\n",
+    "def collision_with_boundaries(snake_head):\n",
+    "    if snake_head[0]>=500 or snake_head[0]<0 or snake_head[1]>=500 or snake_head[1]<0 :\n",
+    "        return 1\n",
+    "    else:\n",
+    "        return 0\n",
+    "\n",
+    "def collision_with_self(snake_position):\n",
+    "    snake_head = snake_position[0]\n",
+    "    if snake_head in snake_position[1:]:\n",
+    "        return 1\n",
+    "    else:\n",
+    "        return 0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "img = np.zeros((500,500,3),dtype='uint8')\n",
+    "# Initial Snake and Apple position\n",
+    "snake_position = [[250,250],[240,250],[230,250]]\n",
+    "apple_position = [random.randrange(1,50)*10,random.randrange(1,50)*10]\n",
+    "score = 0\n",
+    "prev_button_direction = 1\n",
+    "button_direction = 1\n",
+    "snake_head = [250,250]\n",
+    "while True:\n",
+    "    cv2.imshow('a',img)\n",
+    "    cv2.waitKey(1)\n",
+    "    img = np.zeros((500,500,3),dtype='uint8')\n",
+    "    # Display Apple\n",
+    "    cv2.rectangle(img,(apple_position[0],apple_position[1]),(apple_position[0]+10,apple_position[1]+10),(0,0,255),3)\n",
+    "    # Display Snake\n",
+    "    for position in snake_position:\n",
+    "        cv2.rectangle(img,(position[0],position[1]),(position[0]+10,position[1]+10),(0,255,0),3)\n",
+    "    \n",
+    "    # Takes step after fixed time\n",
+    "    t_end = time.time() + 0.2\n",
+    "    k = -1\n",
+    "    while time.time() < t_end:\n",
+    "        if k == -1:\n",
+    "            k = cv2.waitKey(125)\n",
+    "        else:\n",
+    "            continue\n",
+    "            \n",
+    "    # 0-Left, 1-Right, 3-Up, 2-Down, q-Break\n",
+    "    # a-Left, d-Right, w-Up, s-Down\n",
+    "\n",
+    "    if k == ord('a') and prev_button_direction != 1:\n",
+    "        button_direction = 0\n",
+    "    elif k == ord('d') and prev_button_direction != 0:\n",
+    "        button_direction = 1\n",
+    "    elif k == ord('w') and prev_button_direction != 2:\n",
+    "        button_direction = 3\n",
+    "    elif k == ord('s') and prev_button_direction != 3:\n",
+    "        button_direction = 2\n",
+    "    elif k == ord('q'):\n",
+    "        break\n",
+    "    else:\n",
+    "        button_direction = button_direction\n",
+    "    prev_button_direction = button_direction\n",
+    "\n",
+    "    # Change the head position based on the button direction\n",
+    "    if button_direction == 1:\n",
+    "        snake_head[0] += 10\n",
+    "    elif button_direction == 0:\n",
+    "        snake_head[0] -= 10\n",
+    "    elif button_direction == 2:\n",
+    "        snake_head[1] += 10\n",
+    "    elif button_direction == 3:\n",
+    "        snake_head[1] -= 10\n",
+    "\n",
+    "    # Increase Snake length on eating apple\n",
+    "    if snake_head == apple_position:\n",
+    "        apple_position, score = collision_with_apple(apple_position, score)\n",
+    "        snake_position.insert(0,list(snake_head))\n",
+    "\n",
+    "    else:\n",
+    "        snake_position.insert(0,list(snake_head))\n",
+    "        snake_position.pop()\n",
+    "     \n",
+    "    # On collision kill the snake and print the score\n",
+    "    if collision_with_boundaries(snake_head) == 1 or collision_with_self(snake_position) == 1:\n",
+    "        font = cv2.FONT_HERSHEY_SIMPLEX\n",
+    "        img = np.zeros((500,500,3),dtype='uint8')\n",
+    "        cv2.putText(img,'Your Score is {}'.format(score),(140,250), font, 1,(255,255,255),2,cv2.LINE_AA)\n",
+    "        cv2.imshow('a',img)\n",
+    "        cv2.waitKey(0)\n",
+    "        cv2.imwrite('D:/downloads/ii.jpg',img)\n",
+    "        break\n",
+    "        \n",
+    "cv2.destroyAllWindows()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
